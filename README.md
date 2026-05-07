@@ -8,7 +8,7 @@ The use case: a support exec receives a question that mixes account-level facts 
 
 ## Demo
 
-[Demo video link — Loom / YouTube / Drive]
+**Watch the demo:** https://www.loom.com/share/dcf0635e1929462284eb6214b382837d
 
 The walkthrough covers:
 
@@ -29,42 +29,42 @@ The data and the policy are intentionally aligned. Real-world support questions 
 
 ## Architecture
 
-                +----------------------------------+
-                |          Streamlit UI            |
-                |     (chat + PDF upload)          |
-                +----------------+-----------------+
-                                 |
-                                 v
-                +----------------------------------+
-                |     LangGraph state machine      |
-                |                                  |
-                |          supervisor              |
-                |   (intent classifier / router)   |
-                |        |    |    |               |
-                |   +----+    |    +----+          |
-                |   v         v         v          |
-                |  sql      rag      hybrid        |
-                |  agent    agent    agent         |
-                |   |         |         |          |
-                |   +----+----+----+----+          |
-                |        v         v               |
-                |          synthesis               |
-                +-----------+----------------------+
-                            |
-          +-----------------+------------------+
-          v                                    v
-   +-------------+                     +----------------+
-   |  SQLite DB  |                     |  ChromaDB      |
-   |  merchants  |                     |  policy chunks |
-   |  txns       |                     |  + embeddings  |
-   |  disputes   |                     +----------------+
-   |  tickets    |
-   +-------------+
-          ^                                    ^
-          +------------- MCP server -----------+
-              (same tools, exposed over the
-               Model Context Protocol for use
-               by external MCP-compatible hosts)
+                    +-----------------------------------+
+                    |          Streamlit UI             |
+                    |        (chat + PDF upload)        |
+                    +----------------+------------------+
+                                     |
+                                     v
+                    +-----------------------------------+
+                    |       LangGraph state machine     |
+                    |                                   |
+                    |             supervisor            |
+                    |     (intent classifier / router)  |
+                    |         |    |    |    |          |
+                    |    +----+    |    |    +----+     |
+                    |    v         v    v         v     |
+                    |   sql      rag  hybrid   convers. |
+                    |  agent    agent  agent    agent   |
+                    |    |         |    |         |     |
+                    |    +----+----+----+----+----+     |
+                    |              v                    |
+                    |          synthesis                |
+                    +-----------+-----------------------+
+                                      |
+                             +--------+---------+
+                             v                  v
+                          +-------------+   +----------------+
+                          | SQLite DB   |   | ChromaDB       |
+                          | merchants   |   | policy chunks  |
+                          | txns        |   | + embeddings   |
+                          | disputes    |   +----------------+
+                          | tickets     |
+                          +-------------+
+                                   ^                  ^
+                                   +-- MCP server ----+
+                               (same tools, exposed over the
+                                Model Context Protocol for use
+                                by external MCP-compatible hosts)
 
 Why a supervisor pattern instead of one big agent with all the tools? Specialists have smaller, focused tool lists, which means shorter prompts, sharper tool-call decisions, and contained failure modes. Pure SQL questions never trigger embedding lookups; chitchat questions never touch the database. The routing decision is part of the state, so the UI can show *why* a particular path was taken.
 
@@ -129,7 +129,7 @@ cp .env.example .env
 ./setup.sh
 ```
 
-The script creates a venv, installs dependencies, seeds the database, and indexes any PDFs you've placed in `data/uploaded_pdfs/`. If you don't have any PDFs yet, the script will skip indexing with a clear message — drop them in and re-run `python scripts/ingest_documents.py`.
+The script creates a venv, installs dependencies, seeds the database, and indexes any PDFs you've placed in `data/uploaded_pdfs/`. If you don't have any PDFs yet, the script will skip indexing with a clear message - drop them in and re-run `python scripts/ingest_documents.py`.
 
 Then launch:
 
@@ -195,13 +195,13 @@ python scripts/mcp_client_demo.py
 
 For the question *"Does Ema's account meet our standards under the Stripe terms?"*:
 
-1. **Supervisor** classifies the intent as `hybrid` — needs both merchant data and policy text.
+1. **Supervisor** classifies the intent as `hybrid` - needs both merchant data and policy text.
 
 2. **Hybrid node** runs two specialists with explicit sub-queries that tell each one to *retrieve* the relevant facts, not to evaluate the question:
    - SQL agent calls `get_customer_profile("Ema")` and returns Ema's account status, KYC status, plan, monthly volume, transaction count, dispute count, and chargeback ratio.
    - RAG agent searches the indexed Stripe agreement and returns the sections about merchant standards, prohibited businesses, and account suspension grounds.
 
-3. **Synthesis node** applies the policy to the facts. The prompt enforces a specific reasoning pattern: state the rule, state the facts, apply the rule, give a verdict (`ELIGIBLE` / `NOT ELIGIBLE` / `NEEDS REVIEW`). This is the part that took the most iteration — the first version would just summarize both findings instead of actually reasoning across them. Rule 3 in the synthesis prompt ("don't confuse a past refund with present eligibility") was added after observing exactly that mistake during testing.
+3. **Synthesis node** applies the policy to the facts. The prompt enforces a specific reasoning pattern: state the rule, state the facts, apply the rule, give a verdict (`ELIGIBLE` / `NOT ELIGIBLE` / `NEEDS REVIEW`). This is the part that took the most iteration - the first version would just summarize both findings instead of actually reasoning across them. Rule 3 in the synthesis prompt ("don't confuse a past refund with present eligibility") was added after observing exactly that mistake during testing.
 
 Simpler questions skip the hybrid path:
 
@@ -222,7 +222,7 @@ Each specialist runs a bounded ReAct loop (max 5 iterations) so a runaway agent 
 | `search_policy_documents` | Semantic search over indexed policy PDFs |
 | `list_indexed_documents` | Names of PDFs currently in the vector store |
 
-The brief asks for an MCP server, so this is a real one — stdio transport, properly registered tools, runs against the same business logic the in-process LangGraph agents use. There's no duplication: both paths call the helpers in `utils/`. The MCP layer just makes those helpers available to external hosts (Claude Desktop, IDE plugins, other agent frameworks) without code changes on either side.
+The brief asks for an MCP server, so this is a real one - stdio transport, properly registered tools, runs against the same business logic the in-process LangGraph agents use. There's no duplication: both paths call the helpers in `utils/`. The MCP layer just makes those helpers available to external hosts (Claude Desktop, IDE plugins, other agent frameworks) without code changes on either side.
 
 ## Sample queries
 
@@ -243,18 +243,18 @@ The brief asks for an MCP server, so this is a real one — stdio transport, pro
 
 - **Local embeddings.** Replace `OpenAIEmbeddings` in `utils/vector_store.py` with `HuggingFaceEmbeddings` (`sentence-transformers/all-MiniLM-L6-v2` is a solid default).
 
-- **Multi-turn memory.** LangGraph supports checkpointers — add a `MemorySaver` and pass a `thread_id` through `run_query`.
+- **Multi-turn memory.** LangGraph supports checkpointers - add a `MemorySaver` and pass a `thread_id` through `run_query`.
 
 - **Streaming responses.** The synthesis call is the longest part of the round-trip. Streaming it token-by-token to the UI is the obvious next move if interactivity matters more than throughput.
 
 ## Troubleshooting
 
-**`OPENAI_API_KEY not set`** — copy `.env.example` to `.env` and add your key.
+**`OPENAI_API_KEY not set`** - copy `.env.example` to `.env` and add your key.
 
-**`Database not initialized`** — run `python scripts/init_database.py`.
+**`Database not initialized`** - run `python scripts/init_database.py`.
 
-**No PDFs indexed** — drop PDFs in `data/uploaded_pdfs/` and run `python scripts/ingest_documents.py`. Or upload through the Streamlit UI.
+**No PDFs indexed** - drop PDFs in `data/uploaded_pdfs/` and run `python scripts/ingest_documents.py`. Or upload through the Streamlit UI.
 
-**ChromaDB version mismatch after upgrades** — delete `data/chroma_db/` and re-run the ingest script.
+**ChromaDB version mismatch after upgrades** - delete `data/chroma_db/` and re-run the ingest script.
 
-**`Module not found`** — you forgot to activate the venv: `source venv/bin/activate` (or `venv\Scripts\activate` on Windows).
+**`Module not found`** - you forgot to activate the venv: `source venv/bin/activate` (or `venv\Scripts\activate` on Windows).
