@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+venv/
+.venv/
+env/
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Runtime data (keep structure, ignore content)
+data/customer_support.db
+data/chroma_db/
+data/uploaded_pdfs/*.pdf
+!data/uploaded_pdfs/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Streamlit
+.streamlit/secrets.toml

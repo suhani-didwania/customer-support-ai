@@ -1,0 +1,31 @@
+# LLM frameworks
+langchain==0.3.7
+langchain-community==0.3.7
+langchain-openai==0.2.8
+langchain-core==0.3.19
+langgraph==0.2.50
+langchain-chroma==0.1.4
+langchain-text-splitters==0.3.2
+
+# Model Context Protocol
+mcp==1.0.0
+
+# Vector store
+chromadb==0.5.20
+
+# PDF parsing
+pypdf==5.1.0
+pdfplumber==0.11.4
+
+# SQL
+sqlalchemy==2.0.35
+
+# UI
+streamlit==1.40.1
+
+# Utilities
+python-dotenv==1.0.1
+pydantic==2.10.2
+faker==33.1.0
+pandas==2.2.3
+tiktoken==0.8.0
