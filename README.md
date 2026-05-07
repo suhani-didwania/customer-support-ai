@@ -50,21 +50,21 @@ The data and the policy are intentionally aligned. Real-world support questions 
                 |        v         v               |
                 |          synthesis               |
                 +-----------+----------------------+
-                            |
-          +-----------------+------------------+
-          v                                    v
-   +-------------+                     +----------------+
-   |  SQLite DB  |                     |  ChromaDB      |
-   |  merchants  |                     |  policy chunks |
-   |  txns       |                     |  + embeddings  |
-   |  disputes   |                     +----------------+
-   |  tickets    |
-   +-------------+
-          ^                                    ^
-          +------------- MCP server -----------+
-              (same tools, exposed over the
-               Model Context Protocol for use
-               by external MCP-compatible hosts)
+                                    |
+                  +-----------------+------------------+
+                  v                                    v
+          +-------------+                     +----------------+
+         |  SQLite DB  |                     |  ChromaDB      |
+         |  merchants  |                     |  policy chunks |
+         |  txns       |                     |  + embeddings  |
+         |  disputes   |                     +----------------+
+         |  tickets    |
+         +-------------+
+                    ^                                    ^
+                    +------------- MCP server -----------+
+                        (same tools, exposed over the
+                         Model Context Protocol for use
+                         by external MCP-compatible hosts)
 
 Why a supervisor pattern instead of one big agent with all the tools? Specialists have smaller, focused tool lists, which means shorter prompts, sharper tool-call decisions, and contained failure modes. Pure SQL questions never trigger embedding lookups; chitchat questions never touch the database. The routing decision is part of the state, so the UI can show *why* a particular path was taken.
 
