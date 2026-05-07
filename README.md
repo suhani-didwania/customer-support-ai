@@ -8,7 +8,7 @@ The use case: a support exec receives a question that mixes account-level facts 
 
 ## Demo
 
-[Demo video link]
+**Watch the demo:** https://www.loom.com/share/dcf0635e1929462284eb6214b382837d
 
 The walkthrough covers:
 
