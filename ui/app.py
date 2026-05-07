@@ -238,10 +238,10 @@ def _render_trace(sql_result: str, rag_result: str) -> None:
     """Show what each specialist agent retrieved. Used inside an expander."""
     if sql_result:
         st.markdown("**SQL agent findings:**")
-        st.text(sql_result[:2000])
+        st.markdown(sql_result[:2000].replace("$", "\\$"))
     if rag_result:
         st.markdown("**RAG agent findings:**")
-        st.text(rag_result[:2000])
+        st.markdown(rag_result[:2000].replace("$", "\\$"))
 
 
 for msg in st.session_state.messages:
