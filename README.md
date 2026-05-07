@@ -29,42 +29,42 @@ The data and the policy are intentionally aligned. Real-world support questions 
 
 ## Architecture
 
-                +----------------------------------+
-                |          Streamlit UI            |
-                |     (chat + PDF upload)          |
-                +----------------+-----------------+
-                                 |
-                                 v
-                +----------------------------------+
-                |     LangGraph state machine      |
-                |                                  |
-                |          supervisor              |
-                |   (intent classifier / router)   |
-                |        |    |    |               |
-                |   +----+    |    +----+          |
-                |   v         v         v          |
-                |  sql      rag      hybrid        |
-                |  agent    agent    agent         |
-                |   |         |         |          |
-                |   +----+----+----+----+          |
-                |        v         v               |
-                |          synthesis               |
-                +-----------+----------------------+
-                                    |
-                  +-----------------+------------------+
-                  v                                    v
-          +-------------+                     +----------------+
-         |  SQLite DB  |                     |  ChromaDB      |
-         |  merchants  |                     |  policy chunks |
-         |  txns       |                     |  + embeddings  |
-         |  disputes   |                     +----------------+
-         |  tickets    |
-         +-------------+
-                    ^                                    ^
-                    +------------- MCP server -----------+
-                        (same tools, exposed over the
-                         Model Context Protocol for use
-                         by external MCP-compatible hosts)
++-----------------------------------+
+|          Streamlit UI             |
+|        (chat + PDF upload)        |
++----------------+------------------+
+                 |
+                 v
++-----------------------------------+
+|       LangGraph state machine     |
+|                                   |
+|             supervisor            |
+|     (intent classifier / router)  |
+|         |    |    |    |          |
+|    +----+    |    |    +----+     |
+|    v         v    v         v     |
+|   sql      rag  hybrid   convers. |
+|  agent    agent  agent    agent   |
+|    |         |    |         |     |
+|    +----+----+----+----+----+     |
+|              v                    |
+|          synthesis                |
++-----------+-----------------------+
+            |
+   +--------+---------+
+   v                  v
++-------------+   +----------------+
+| SQLite DB   |   | ChromaDB       |
+| merchants   |   | policy chunks  |
+| txns        |   | + embeddings   |
+| disputes    |   +----------------+
+| tickets     |
++-------------+
+       ^                  ^
+       +-- MCP server ----+
+   (same tools, exposed over the
+    Model Context Protocol for use
+    by external MCP-compatible hosts)
 
 Why a supervisor pattern instead of one big agent with all the tools? Specialists have smaller, focused tool lists, which means shorter prompts, sharper tool-call decisions, and contained failure modes. Pure SQL questions never trigger embedding lookups; chitchat questions never touch the database. The routing decision is part of the state, so the UI can show *why* a particular path was taken.
 
