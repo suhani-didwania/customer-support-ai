@@ -8,7 +8,7 @@ The use case: a support exec receives a question that mixes account-level facts 
 
 ## Demo
 
-[Demo video link — Loom / YouTube / Drive]
+[Demo video link]
 
 The walkthrough covers:
 
